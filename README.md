@@ -5,29 +5,34 @@ A simple production-style Flask REST API with:
 - Modular project structure
 - Unit tests
 - Health check endpoint
+- Environment-based configuration
 
 ---
 
 # Project Structure
 
 ```text
-cohort-app/
+cohort2-app/
 │
 ├── src/
 │   ├── app.py
 │   │
+│   ├── config/
+│   │   └── settings.py
+│   │
 │   ├── models/
 │   │   └── health_response.py
 │   │
-│   ├── utils/
-│   │   └── logger_config.py
+│   ├── routes/
+│   │   └── health_routes.py
 │   │
-│   └── routes/
-│       └── health_routes.py
+│   └── utils/
+│       └── logger_config.py
 │
 ├── tests/
 │   └── test_app.py
 │
+├── .env
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
@@ -57,7 +62,7 @@ pip --version
 
 ```bash
 git clone <repository-url>
-cd cohort-app
+cd cohort2-shubham-gupta
 ```
 
 ---
@@ -80,7 +85,19 @@ venv\Scripts\activate
 
 ---
 
-## 3. Install Dependencies
+## 3. Configure Environment Variables
+
+Create a `.env` file in project root:
+
+```env
+APP_VERSION=1.0.0
+APP_ENVIRONMENT=dev
+APP_PORT=5050
+```
+
+---
+
+## 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -208,6 +225,7 @@ OK
 ```txt
 Flask==3.1.0
 Werkzeug==3.1.3
+python-dotenv==1.0.1
 ```
 
 ---

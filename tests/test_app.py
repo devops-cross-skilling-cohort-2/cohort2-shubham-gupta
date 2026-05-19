@@ -1,6 +1,10 @@
 # test_app.py
 import unittest
 from src.app import app
+from src.config.settings import (
+    APP_VERSION,
+    APP_ENVIRONMENT
+)
 
 
 class HealthApiTest(unittest.TestCase):
@@ -18,8 +22,8 @@ class HealthApiTest(unittest.TestCase):
         data = response.get_json()
 
         self.assertEqual(data["status"], "running")
-        self.assertEqual(data["version"], "1.0.0")
-        self.assertEqual(data["environment"], "dev")
+        self.assertEqual(data["version"], APP_VERSION)
+        self.assertEqual(data["environment"], APP_ENVIRONMENT)
 
         self.assertIn("timestamp", data)
 
