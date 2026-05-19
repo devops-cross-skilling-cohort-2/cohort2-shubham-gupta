@@ -184,8 +184,19 @@ Current test cases include:
 
 ```text
 ....
+$ python -m unittest discover tests                                    
+Starting Flask REST API server...
+{"timestamp": "2026-05-19T03:37:27.691820+00:00", "event": "api_request", "method": "POST", "path": "/health", "client_ip": "127.0.0.1"}
+{"timestamp": "2026-05-19T03:37:27.692151+00:00", "event": "api_response", "response": {"status_code": 405}}
+.{"timestamp": "2026-05-19T03:37:27.692397+00:00", "event": "api_request", "method": "PUT", "path": "/health", "client_ip": "127.0.0.1"}
+{"timestamp": "2026-05-19T03:37:27.692475+00:00", "event": "api_response", "response": {"status_code": 405}}
+.{"timestamp": "2026-05-19T03:37:27.692724+00:00", "event": "api_request", "method": "GET", "path": "/health", "client_ip": "127.0.0.1"}
+{"timestamp": "2026-05-19T03:37:27.692790+00:00", "event": "api_response", "response": {"status_code": 200}}
+.{"timestamp": "2026-05-19T03:37:27.693006+00:00", "event": "api_request", "method": "GET", "path": "/invalid-endpoint", "client_ip": "127.0.0.1"}
+{"timestamp": "2026-05-19T03:37:27.693077+00:00", "event": "api_response", "response": {"status_code": 404}}
+.
 ----------------------------------------------------------------------
-Ran 4 tests in 0.015s
+Ran 4 tests in 0.007s
 
 OK
 ```
