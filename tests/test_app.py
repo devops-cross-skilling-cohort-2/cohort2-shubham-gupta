@@ -1,6 +1,6 @@
 # test_app.py
 import unittest
-from app import app
+from src.app import app
 
 
 class HealthApiTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class HealthApiTest(unittest.TestCase):
 
         data = response.get_json()
 
-        self.assertEqual(data["status"], "healthy")
+        self.assertEqual(data["status"], "running")
         self.assertEqual(data["version"], "1.0.0")
         self.assertEqual(data["environment"], "dev")
 

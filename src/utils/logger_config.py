@@ -1,4 +1,3 @@
-# logger_config.py
 import json
 import logging
 from datetime import datetime, timezone
@@ -13,7 +12,7 @@ def setup_logger():
 
     logger = logging.getLogger("health-api")
 
-    # Disable default Flask/Werkzeug logs
+    # Disable default werkzeug logs
     logging.getLogger("werkzeug").disabled = True
 
     return logger
