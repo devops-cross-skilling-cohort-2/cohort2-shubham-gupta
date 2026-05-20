@@ -1,53 +1,52 @@
-# Cohort2 Application
+# Cohort Application
 
-A simple production-style Flask REST API with:
-- Structured logging
-- Modular project structure
-- Unit tests
-- Health check endpoint
-- Environment-based configuration
+A Flask REST API with structured logging, modular architecture, and comprehensive testing.
+
+## Features
+
+- **Structured Logging**: JSON-formatted logs for easy parsing and monitoring
+- **Modular Architecture**: Clean separation of concerns with organized project structure
+- **Health Check Endpoint**: Monitor application status and configuration
+- **Environment Configuration**: Flexible configuration via environment variables
+- **Comprehensive Testing**: Unit tests with full coverage
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
-cohort2-app/
+cohort-app/
 │
 ├── src/
-│   ├── app.py
-│   │
+│   ├── app.py                      # Application entry point
 │   ├── config/
-│   │   └── settings.py
-│   │
+│   │   └── settings.py             # Configuration management
 │   ├── models/
-│   │   └── health_response.py
-│   │
+│   │   └── health_response.py      # Response models
 │   ├── routes/
-│   │   └── health_routes.py
-│   │
+│   │   └── health_routes.py        # API route definitions
 │   └── utils/
-│       └── logger_config.py
+│       └── logger_config.py        # Logging configuration
 │
 ├── tests/
-│   └── test_app.py
+│   └── test_app.py                 # Unit tests
 │
-├── .env
-├── requirements.txt
-├── README.md
-├── .gitignore
+├── evidence_pack/
+│   └── week1_evidence_pack.md      # Week 1 implementation evidence
 │
-└── venv/
+├── .env                            # Environment variables (create this)
+├── requirements.txt                # Python dependencies
+└── README.md
 ```
 
 ---
 
-# Prerequisites
+## Prerequisites
 
-- Python 3.10+
-- pip
+- Python 3.10 or higher
+- pip package manager
 
-Verify installation:
+Verify your installation:
 
 ```bash
 python3 --version
@@ -56,38 +55,32 @@ pip --version
 
 ---
 
-# Setup
+## Getting Started
 
-## 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
-cd cohort2-shubham-gupta
+cd cohort-app-shgupta
 ```
 
----
+### 2. Set Up Virtual Environment
 
-## 2. Create Virtual Environment
-
-### Mac/Linux
-
+**Mac/Linux:**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Windows
-
+**Windows:**
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
 
----
+### 3. Configure Environment
 
-## 3. Configure Environment Variables
-
-Create a `.env` file in project root:
+Create a `.env` file in the project root:
 
 ```env
 APP_VERSION=1.0.0
@@ -95,60 +88,38 @@ APP_ENVIRONMENT=dev
 APP_PORT=5050
 ```
 
----
-
-## 4. Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-![env setup](assets/setup.png)
 ---
 
-# Run Application
+## Running the Application
 
-Start the Flask API server:
+Start the Flask server:
 
 ```bash
 python src/app.py
 ```
 
-Server starts on:
+The application will start on `http://localhost:5050`
 
-```text
-http://localhost:5050
-```
-
-App running logs:
-```text
-Starting Flask REST API server...
-Application is running on port 5050
- * Serving Flask app 'app'
- * Debug mode: off
-```
-
-![App run](assets/app_run.png)
 ---
 
-# API Endpoints
+## API Endpoints
 
-## Health Check
+### Health Check
 
-### Request
+**Endpoint:** `GET /health`
 
-```http
-GET /health
-```
-
-### Curl Example
-
+**Example:**
 ```bash
 curl http://localhost:5050/health
 ```
 
-### Sample Response
-
+**Response:**
 ```json
 {
   "status": "running",
@@ -158,69 +129,24 @@ curl http://localhost:5050/health
 }
 ```
 
-![user response](assets/user_response.png)
 ---
 
-# Structured Logging
+## Testing
 
-Application logs all API requests/responses in structured JSON format.
-
-## Sample Logs
-
-```json
-{"timestamp": "2026-05-19T03:19:08.131248+00:00", "event": "api_request", "method": "GET", "path": "/health", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:19:08.131550+00:00", "event": "api_response", "response": {"status_code": 200}}
-{"timestamp": "2026-05-19T03:19:26.348144+00:00", "event": "api_request", "method": "GET", "path": "/invalid-endpoint", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:19:26.348882+00:00", "event": "api_response", "response": {"status_code": 404}}
-```
-
----
-
-# Run Tests
-
-Run all unit tests:
+Run the test suite:
 
 ```bash
 python -m unittest discover tests
 ```
 
-![test run](assets/test_run.png)
----
-
-# Test Coverage
-
-Current test cases include:
-
+**Test Coverage:**
 - Health endpoint success response
-- Invalid endpoint handling
-- POST/PUT method not allowed
+- Invalid endpoint handling (404)
+- Method not allowed handling (405)
 
 ---
 
-# Sample Test Output
-
-```text
-....
-$ python -m unittest discover tests                                    
-Starting Flask REST API server...
-{"timestamp": "2026-05-19T03:37:27.691820+00:00", "event": "api_request", "method": "POST", "path": "/health", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:37:27.692151+00:00", "event": "api_response", "response": {"status_code": 405}}
-.{"timestamp": "2026-05-19T03:37:27.692397+00:00", "event": "api_request", "method": "PUT", "path": "/health", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:37:27.692475+00:00", "event": "api_response", "response": {"status_code": 405}}
-.{"timestamp": "2026-05-19T03:37:27.692724+00:00", "event": "api_request", "method": "GET", "path": "/health", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:37:27.692790+00:00", "event": "api_response", "response": {"status_code": 200}}
-.{"timestamp": "2026-05-19T03:37:27.693006+00:00", "event": "api_request", "method": "GET", "path": "/invalid-endpoint", "client_ip": "127.0.0.1"}
-{"timestamp": "2026-05-19T03:37:27.693077+00:00", "event": "api_response", "response": {"status_code": 404}}
-.
-----------------------------------------------------------------------
-Ran 4 tests in 0.007s
-
-OK
-```
-
----
-
-# requirements.txt
+## Dependencies
 
 ```txt
 Flask==3.1.0
@@ -229,3 +155,7 @@ python-dotenv==1.0.1
 ```
 
 ---
+
+## Documentation
+
+- **Week 1 Evidence Pack**: See [evidence_pack/week1_evidence_pack.md](evidence_pack/week1_evidence_pack.md) for detailed implementation evidence and testing results
