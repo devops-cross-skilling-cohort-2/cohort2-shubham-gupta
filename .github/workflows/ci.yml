@@ -1,4 +1,4 @@
-name: Flask CI Pipeline
+name: Python Cohort2 App CI Pipeline
 
 on:
   push:
@@ -26,21 +26,26 @@ jobs:
       
       - name: Install Dependencies
         run: |
+          echo "Installing project dependencies..."
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install flake8
       
       - name: Show Installed Packages
         run: |
+          echo "Installed Python packages:"
           pip list
 
       - name: Run Flake8 Lint Validation
         run: |
+          echo "Running lint validation..."
           flake8 src tests \
             --count \
             --select=E9,F63,F7,F82 \
             --show-source \
             --statistics
+
+          echo "Lint validation completed successfully."
 
   unit-tests:
     name: Run Unit Tests
@@ -58,11 +63,18 @@ jobs:
 
         - name: Install Dependencies
           run: |
+            echo "Installing project dependencies..."
             python -m pip install --upgrade pip
             pip install -r requirements.txt
         
+        - name: Show Installed Packages
+          run: |
+            echo "Installed Python packages:"
+            pip list
+        
         - name: Run Unit Tests
           run: |
+            echo "Running unit tests..."
             python -m unittest discover tests -v
             echo "Unit tests completed successfully."
 
@@ -82,22 +94,29 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          echo "Installing project dependencies..."
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start Flask Application
+      - name: Start Python Cohort2 App Application
         run: |
+          echo "Starting Python Cohort2 App application..."
           nohup python -m src.app > app.log 2>&1 &
+          echo "Application started in background."
 
       - name: Wait for Application Startup
         run: |
+          echo "Waiting for application startup..."
           sleep 5
 
       - name: Verify Application is Running
         run: |
+          echo "Checking /health endpoint..."
           curl --fail --verbose http://127.0.0.1:5050/health
+          echo "Health endpoint verification successful."
 
       - name: Print Application Logs
         if: always()
         run: |
+          echo "Printing Python Cohort2 App application logs..."
           cat app.log || true
