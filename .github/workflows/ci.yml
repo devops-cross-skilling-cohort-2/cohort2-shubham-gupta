@@ -5,6 +5,11 @@ on:
     branches:
       - "**"
 
+env:
+  APP_VERSION: 1.0.0
+  APP_ENVIRONMENT: ci
+  APP_PORT: 5050      
+
 jobs:
   lint-validation:
     name: Lint Validation
@@ -12,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       
       - name: Setup Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       
@@ -44,10 +49,10 @@ jobs:
 
     steps:
         - name: Checkout Repository
-          uses: actions/checkout@v4
+          uses: actions/checkout@v6
 
         - name: Setup Python 3.10
-          uses: actions/setup-python@v5
+          uses: actions/setup-python@v6
           with:
             python-version: "3.10"
 
@@ -68,10 +73,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
