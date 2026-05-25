@@ -87,7 +87,7 @@ jobs:
 
       - name: Start Flask Application
         run: |
-          nohup python src/app.py > app.log 2>&1 &
+          nohup python -m src.app > app.log 2>&1 &
 
       - name: Wait for Application Startup
         run: |
