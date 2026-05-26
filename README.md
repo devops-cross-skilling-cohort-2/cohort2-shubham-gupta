@@ -159,3 +159,6 @@ python-dotenv==1.0.1
 ## Documentation
 
 - **Week 1 Evidence Pack**: See [evidence_pack/week1_evidence_pack.md](evidence_pack/week1_evidence_pack.md) for detailed implementation evidence and testing results
+
+
+- **Week 2 Evidence Pack**: See [evidence_pack/week2_evidence_pack.md](evidence_pack/week2_evidence_pack.md) for detailed implementation evidence for github actions
