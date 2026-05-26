@@ -25,7 +25,7 @@ def after_request_logging(response):
 app.register_blueprint(health_blueprint)
 
 if __name__ == "__main__":
-    logger.info(f"Application is running on port {APP_PORT}")
+logger.info(f"Application is running on port {APP_PORT}")
     app.run(
         debug=False,
         use_reloader=False,
