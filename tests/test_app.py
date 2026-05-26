@@ -21,7 +21,7 @@ class HealthApiTest(unittest.TestCase):
 
         data = response.get_json()
 
-        self.assertEqual(data["status"], "healthy")
+        self.assertEqual(data["status"], "running")
         self.assertEqual(data["version"], APP_VERSION)
         self.assertEqual(data["environment"], APP_ENVIRONMENT)
 
