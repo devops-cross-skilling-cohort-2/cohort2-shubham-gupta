@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 5050
 
-CMD ["python", "src/app.py"]
+CMD ["python", "-m", "src.app"]
