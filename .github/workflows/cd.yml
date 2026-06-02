@@ -1,9 +1,10 @@
 name: Python Cohort2 App CD Pipeline
 
 on:
-  push:
-    branches:
-      - "**"
+  workflow_run:
+    workflows: ["Python Cohort2 App CI Pipeline"]
+    types:
+      - completed
 
   workflow_dispatch:
 
@@ -16,6 +17,7 @@ jobs:
   docker-build-push:
     name: Docker Build and Push
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout Repository
