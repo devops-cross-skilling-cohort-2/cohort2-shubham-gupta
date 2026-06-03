@@ -3,6 +3,7 @@ name: Python Cohort2 App CD Pipeline
 on:
   workflow_run:
     workflows: ["Python Cohort2 App CI Pipeline"]
+    branches: [main]
     types:
       - completed
 
