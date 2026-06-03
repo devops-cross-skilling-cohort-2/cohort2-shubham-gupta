@@ -1,14 +1,16 @@
 # Cohort Application
 
-A Flask REST API with structured logging, modular architecture, and comprehensive testing.
+A Flask REST API with structured logging, modular architecture, comprehensive testing, and containerised deployment.
 
 ## Features
 
 - **Structured Logging**: JSON-formatted logs for easy parsing and monitoring
-- **Modular Architecture**: Clean separation of concerns with organized project structure
+- **Modular Architecture**: Clean separation of concerns with organised project structure
 - **Health Check Endpoint**: Monitor application status and configuration
-- **Environment Configuration**: Flexible configuration via environment variables
+- **Environment Configuration**: Flexible runtime config via environment variables
 - **Comprehensive Testing**: Unit tests with full coverage
+- **Containerised**: Secure, efficient Docker image built on `python:3.10-slim`, runs as non-root user
+- **CI/CD Pipelines**: Automated lint, test, build, push, and image verification via GitHub Actions
 
 ---
 
@@ -31,10 +33,19 @@ cohort-app/
 ├── tests/
 │   └── test_app.py                 # Unit tests
 │
-├── evidence_pack/
-│   └── week1_evidence_pack.md      # Week 1 implementation evidence
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                  # CI: lint → unit tests → health check
+│       └── cd.yml                  # CD: docker build → push → verify
 │
-├── .env                            # Environment variables (create this)
+├── evidence_pack/
+│   ├── week1_evidence_pack.md
+│   ├── week2_evidence_pack.md
+│   └── week3_evidence_pack.md
+│
+├── Dockerfile                      # Container image definition
+├── .dockerignore                   # Files excluded from Docker build context
+├── .env                            # Environment variables (create this, do not commit)
 ├── requirements.txt                # Python dependencies
 └── README.md
 ```
@@ -45,12 +56,14 @@ cohort-app/
 
 - Python 3.10 or higher
 - pip package manager
+- Docker (for running the container)
 
 Verify your installation:
 
 ```bash
 python3 --version
 pip --version
+docker --version
 ```
 
 ---
@@ -98,13 +111,37 @@ pip install -r requirements.txt
 
 ## Running the Application
 
-Start the Flask server:
+### Locally
 
 ```bash
-python src/app.py
+python -m src.app
 ```
 
 The application will start on `http://localhost:5050`
+
+### With Docker
+
+**Pull from Docker Hub:**
+```bash
+docker pull shguptaee/cohort2-app:latest
+```
+
+**Run the container:**
+```bash
+docker run -p 5050:5050 \
+  -e APP_VERSION=1.0.0 \
+  -e APP_ENVIRONMENT=dev \
+  -e APP_PORT=5050 \
+  shguptaee/cohort2-app:latest
+```
+
+The application will start on `http://localhost:5050`
+
+**Build locally:**
+```bash
+docker build -t cohort2-app:latest .
+docker run -p 5050:5050 cohort2-app:latest
+```
 
 ---
 
@@ -146,6 +183,40 @@ python -m unittest discover tests
 
 ---
 
+## Docker Image
+
+| Property | Value |
+|----------|-------|
+| Base image | `python:3.10-slim` |
+| Runs as | Non-root user (`appuser`, UID 1001) |
+| Exposed port | `5050` |
+| Docker Hub | `shguptaee/cohort2-app` |
+
+Runtime values are passed via environment variables at container start — nothing sensitive is baked into the image.
+
+---
+
+## CI/CD Pipelines
+
+### CI (`ci.yml`)
+Triggers on every push and pull request to any branch.
+
+```
+lint-validation → unit-tests → health-check
+```
+
+### CD (`cd.yml`)
+Triggers on merge to `main` (after CI passes).
+
+```
+docker-build-push → verify-image
+```
+
+- Builds and pushes image to Docker Hub tagged with `:latest` and `:<git-sha>`
+- Pulls the pushed image on a fresh runner and verifies the `/health` endpoint
+
+---
+
 ## Dependencies
 
 ```txt
@@ -158,7 +229,6 @@ python-dotenv==1.0.1
 
 ## Documentation
 
-- **Week 1 Evidence Pack**: See [evidence_pack/week1_evidence_pack.md](evidence_pack/week1_evidence_pack.md) for detailed implementation evidence and testing results
-
-
-- **Week 2 Evidence Pack**: See [evidence_pack/week2_evidence_pack.md](evidence_pack/week2_evidence_pack.md) for detailed implementation evidence for github actions
+- **Week 1 Evidence Pack**: See [evidence_pack/week1_evidence_pack.md](evidence_pack/week1_evidence_pack.md) for Flask API implementation evidence
+- **Week 2 Evidence Pack**: See [evidence_pack/week2_evidence_pack.md](evidence_pack/week2_evidence_pack.md) for GitHub Actions CI pipeline evidence
+- **Week 3 Evidence Pack**: See [evidence_pack/week3_evidence_pack.md](evidence_pack/week3_evidence_pack.md) for Docker containerisation and CD pipeline evidence
