@@ -1,17 +1,19 @@
 name: K8s Dev Apply
 
 on:
-  push:
-    branches:
-      - "**"
-    paths:
-      - 'k8s/dev/**'
+  workflow_run:
+    workflows: ["Python Cohort2 App CD Pipeline"]
+    branches: [main]
+    types:
+      - completed
+
   workflow_dispatch:
 
 jobs:
   k8s-apply:
     name: Apply Manifests to dev
     runs-on: [self-hosted, self-hosted-local]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout Repository
