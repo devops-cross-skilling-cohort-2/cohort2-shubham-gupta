@@ -1,0 +1,53 @@
+name: K8s Dev Apply
+
+on:
+  workflow_run:
+    workflows: ["Python Cohort2 App CD Pipeline"]
+    branches: [main]
+    types:
+      - completed
+
+  workflow_dispatch:
+
+jobs:
+  k8s-apply:
+    name: Apply Manifests to dev
+    runs-on: [self-hosted, self-hosted-local]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Verify Cluster Connectivity
+        run: kubectl cluster-info --context k3d-cohort-local
+
+      - name: Apply Namespace
+        run: kubectl apply -f k8s/dev/namespace.yaml
+
+      - name: Apply ConfigMap and Secret
+        run: |
+          kubectl apply -f k8s/dev/configmap.yaml
+          kubectl apply -f k8s/dev/secret.yaml
+
+      - name: Apply Deployment and Service
+        run: |
+          kubectl apply -f k8s/dev/deployment.yaml
+          kubectl apply -f k8s/dev/service.yaml
+
+      - name: Wait for Rollout
+        run: |
+          kubectl rollout status deployment/cohort2-app \
+            -n cohort-dev \
+            --timeout=120s
+
+      - name: Verify Pods are Ready
+        run: kubectl get pods -n cohort-dev
+
+      - name: Verify Service Endpoint
+        run: |
+          kubectl port-forward svc/cohort2-app-svc 9091:80 \
+            -n cohort-dev &
+          sleep 5
+          curl --fail http://localhost:9091/health
+          kill %1

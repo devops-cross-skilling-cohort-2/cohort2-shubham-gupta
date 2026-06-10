@@ -1,6 +1,6 @@
 # Cohort Application
 
-A Flask REST API with structured logging, modular architecture, comprehensive testing, and containerised deployment.
+A Flask REST API with structured logging, modular architecture, comprehensive testing, containerised deployment, and Kubernetes orchestration.
 
 ## Features
 
@@ -11,6 +11,7 @@ A Flask REST API with structured logging, modular architecture, comprehensive te
 - **Comprehensive Testing**: Unit tests with full coverage
 - **Containerised**: Secure, efficient Docker image built on `python:3.10-slim`, runs as non-root user
 - **CI/CD Pipelines**: Automated lint, test, build, push, and image verification via GitHub Actions
+- **Kubernetes**: Deployed to K3D local cluster with probes, resource controls, and rolling updates
 
 ---
 
@@ -33,15 +34,25 @@ cohort-app/
 ├── tests/
 │   └── test_app.py                 # Unit tests
 │
+├── k8s/
+│   └── dev/
+│       ├── namespace.yaml          # cohort-dev namespace
+│       ├── configmap.yaml          # Runtime config (version, env, port)
+│       ├── secret.yaml             # Secret resource (placeholder)
+│       ├── deployment.yaml         # 2 replicas, probes, resource limits
+│       └── service.yaml            # ClusterIP service
+│
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                  # CI: lint → unit tests → health check
-│       └── cd.yml                  # CD: docker build → push → verify
+│       ├── cd.yml                  # CD: docker build → push → verify
+│       └── k8s-apply.yml           # K8s: apply manifests → rollout → verify
 │
 ├── evidence_pack/
 │   ├── week1_evidence_pack.md
 │   ├── week2_evidence_pack.md
-│   └── week3_evidence_pack.md
+│   ├── week3_evidence_pack.md
+│   └── week4_evidence_pack.md
 │
 ├── Dockerfile                      # Container image definition
 ├── .dockerignore                   # Files excluded from Docker build context
@@ -57,6 +68,7 @@ cohort-app/
 - Python 3.10 or higher
 - pip package manager
 - Docker (for running the container)
+- K3D + kubectl (for Kubernetes deployment)
 
 Verify your installation:
 
@@ -64,6 +76,8 @@ Verify your installation:
 python3 --version
 pip --version
 docker --version
+k3d version
+kubectl version --client
 ```
 
 ---
@@ -215,6 +229,55 @@ docker-build-push → verify-image
 - Builds and pushes image to Docker Hub tagged with `:latest` and `:<git-sha>`
 - Pulls the pushed image on a fresh runner and verifies the `/health` endpoint
 
+### K8s Apply (`k8s-apply.yml`)
+Triggers after CD pipeline succeeds on `main`. Runs on a self-hosted runner (macOS ARM64) with local K3D cluster access.
+
+```
+apply manifests → wait for rollout → verify /health endpoint
+```
+
+- Applies Namespace, ConfigMap, Secret, Deployment, Service to `cohort-dev` namespace
+- Waits for rollout to complete (2 minute timeout)
+- Verifies `/health` endpoint returns HTTP 200 via `kubectl port-forward`
+
+---
+
+## Kubernetes
+
+### Cluster
+Local K3D cluster (`cohort-local`) — 1 server + 1 agent node.
+
+```bash
+k3d cluster create cohort-local --agents 1 --wait
+```
+
+### Deploy to dev
+
+```bash
+kubectl apply -f k8s/dev/
+kubectl rollout status deployment/cohort2-app -n cohort-dev
+```
+
+### Verify
+
+```bash
+kubectl get pods -n cohort-dev
+kubectl port-forward svc/cohort2-app-svc 9090:80 -n cohort-dev &
+curl http://localhost:9090/health
+```
+
+### Deployment config
+
+| Property | Value |
+|----------|-------|
+| Namespace | `cohort-dev` |
+| Replicas | 2 |
+| Strategy | `RollingUpdate` |
+| Readiness probe | `GET /health` — delay 5s, period 10s |
+| Liveness probe | `GET /health` — delay 10s, period 15s |
+| CPU requests/limits | `100m` / `250m` |
+| Memory requests/limits | `128Mi` / `256Mi` |
+
 ---
 
 ## Dependencies
@@ -232,3 +295,4 @@ python-dotenv==1.0.1
 - **Week 1 Evidence Pack**: See [evidence_pack/week1_evidence_pack.md](evidence_pack/week1_evidence_pack.md) for Flask API implementation evidence
 - **Week 2 Evidence Pack**: See [evidence_pack/week2_evidence_pack.md](evidence_pack/week2_evidence_pack.md) for GitHub Actions CI pipeline evidence
 - **Week 3 Evidence Pack**: See [evidence_pack/week3_evidence_pack.md](evidence_pack/week3_evidence_pack.md) for Docker containerisation and CD pipeline evidence
+- **Week 4 Evidence Pack**: See [evidence_pack/week4_evidence_pack.md](evidence_pack/week4_evidence_pack.md) for Kubernetes deployment and CI apply evidence
