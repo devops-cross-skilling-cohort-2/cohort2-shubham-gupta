@@ -63,6 +63,7 @@ jobs:
         run: |
           kubectl apply -f k8s/prod/deployment.yaml
           kubectl apply -f k8s/prod/service.yaml
+          kubectl rollout restart deployment/cohort2-app -n cohort-prod
 
       - name: Wait for Rollout
         run: |
