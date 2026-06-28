@@ -42,6 +42,7 @@ jobs:
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest
             ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }}
+            ${{ github.ref_type == 'tag' && format('{0}/cohort2-app:{1}', vars.DOCKERHUB_USERNAME, github.ref_name) || '' }}
 
   trivy-scan:
     name: Trivy Image Scan

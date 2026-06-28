@@ -1,0 +1,76 @@
+name: K8s Prod Deploy
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to deploy to prod (e.g. v1.0.0 or a git SHA for rollback)'
+        required: true
+        type: string
+
+jobs:
+  k8s-prod-apply:
+    name: Deploy to Prod
+    runs-on: [self-hosted, self-hosted-local]
+    environment: prod
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Resolve Image Tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify Cluster Connectivity
+        run: kubectl cluster-info --context k3d-cohort-local
+
+      - name: Apply Namespace
+        run: kubectl apply -f k8s/prod/namespace.yaml
+
+      - name: Apply ConfigMap
+        run: kubectl apply -f k8s/prod/configmap.yaml
+
+      - name: Create Secret from GitHub Secrets
+        run: |
+          kubectl create secret generic cohort2-app-secret \
+            --from-literal=APP_SECRET_KEY="${{ secrets.APP_SECRET_KEY_PROD }}" \
+            --namespace=cohort-prod \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Pin Image to Release Tag
+        run: |
+          IMAGE_TAG="${{ steps.tag.outputs.value }}"
+          sed -i "s|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${IMAGE_TAG}|g" k8s/prod/deployment.yaml
+          echo "Image pinned to: ${IMAGE_TAG}"
+
+      - name: Apply Deployment and Service
+        run: |
+          kubectl apply -f k8s/prod/deployment.yaml
+          kubectl apply -f k8s/prod/service.yaml
+
+      - name: Wait for Rollout
+        run: |
+          kubectl rollout status deployment/cohort2-app \
+            -n cohort-prod \
+            --timeout=180s
+
+      - name: Verify Pods are Ready
+        run: kubectl get pods -n cohort-prod
+
+      - name: Verify Service Endpoint
+        run: |
+          kubectl port-forward svc/cohort2-app-svc 9092:80 \
+            -n cohort-prod &
+          sleep 5
+          curl --fail http://localhost:9092/health
+          kill %1

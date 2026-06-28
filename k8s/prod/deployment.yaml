@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cohort2-app
+  namespace: cohort-prod
+  labels:
+    app: cohort2-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cohort2-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: cohort2-app
+    spec:
+      containers:
+        - name: cohort2-app
+          # CI substitutes :latest with the exact git SHA at deploy time via k8s-apply.yml
+          image: shguptaee/cohort2-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5050
+
+          envFrom:
+            - configMapRef:
+                name: cohort2-app-config
+
+          env:
+            - name: APP_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cohort2-app-secret
+                  key: APP_SECRET_KEY
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5050
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5050
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 3
