@@ -40,8 +40,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            shguptaee/cohort2-app:latest
-            shguptaee/cohort2-app:${{ github.sha }}
+            ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }}
 
   verify-image:
     name: Verify Image on Fresh Runner
@@ -52,13 +52,13 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
         with:
-          username: shguptaee
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull Image by Commit SHA
         run: |
-          echo "Pulling image shguptaee/cohort2-app:${{ github.sha }}..."
-          docker pull shguptaee/cohort2-app:${{ github.sha }}
+          echo "Pulling image ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }}..."
+          docker pull ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }}
           echo "Image pulled successfully."
 
       - name: Run Container
@@ -70,7 +70,7 @@ jobs:
             -e APP_VERSION=${{ env.APP_VERSION }} \
             -e APP_ENVIRONMENT=${{ env.APP_ENVIRONMENT }} \
             -e APP_PORT=${{ env.APP_PORT }} \
-            shguptaee/cohort2-app:${{ github.sha }}
+            ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }}
           echo "Container started."
 
       - name: Wait for Application Startup
@@ -106,5 +106,5 @@ jobs:
           echo "Cleaning up..."
           docker stop app-under-test || true
           docker rm   app-under-test || true
-          docker rmi  shguptaee/cohort2-app:${{ github.sha }} || true
+          docker rmi  ${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${{ github.sha }} || true
           echo "Cleanup complete."
