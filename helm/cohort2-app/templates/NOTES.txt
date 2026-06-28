@@ -1,0 +1,8 @@
+Release: {{ .Release.Name }}
+Namespace: {{ .Values.namespace }}
+Image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+Replicas: {{ .Values.replicaCount }}
+
+Access the app:
+  kubectl port-forward svc/{{ include "cohort2-app.fullname" . }}-svc 9090:80 -n {{ .Values.namespace }}
+  curl http://localhost:9090/health

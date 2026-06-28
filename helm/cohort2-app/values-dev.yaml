@@ -1,0 +1,4 @@
+namespace: cohort-dev
+replicaCount: 2
+config:
+  APP_ENVIRONMENT: "dev"

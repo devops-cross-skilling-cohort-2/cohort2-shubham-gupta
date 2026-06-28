@@ -1,0 +1,4 @@
+namespace: cohort-prod
+replicaCount: 3
+config:
+  APP_ENVIRONMENT: "prod"

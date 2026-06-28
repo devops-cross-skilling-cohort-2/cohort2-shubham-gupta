@@ -54,6 +54,35 @@ jobs:
             --statistics
 
           echo "Lint validation completed successfully."
+    
+  helm-validate:
+    name: Helm Chart Validation
+    runs-on: ubuntu-latest
+    needs: lint-validation
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm Lint
+        run: helm lint ./helm/cohort2-app
+
+      - name: Render Dev Template
+        run: |
+          helm template cohort2-app-dev ./helm/cohort2-app \
+            -f helm/cohort2-app/values-dev.yaml \
+            --set image.tag=test \
+            --set secret.appSecretKey=dummy
+
+      - name: Render Prod Template
+        run: |
+          helm template cohort2-app-prod ./helm/cohort2-app \
+            -f helm/cohort2-app/values-prod.yaml \
+            --set image.tag=test \
+            --set secret.appSecretKey=dummy
 
   unit-tests:
     name: Run Unit Tests
