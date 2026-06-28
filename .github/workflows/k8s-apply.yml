@@ -1,4 +1,4 @@
-name: K8s Dev Apply
+name: K8s Dev Deploy
 
 on:
   workflow_run:
@@ -10,10 +10,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  k8s-apply:
-    name: Apply Manifests to dev
+  k8s-dev-apply:
+    name: Deploy to Dev
     runs-on: [self-hosted, self-hosted-local]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout Repository
@@ -25,10 +25,22 @@ jobs:
       - name: Apply Namespace
         run: kubectl apply -f k8s/dev/namespace.yaml
 
-      - name: Apply ConfigMap and Secret
+      - name: Apply ConfigMap
+        run: kubectl apply -f k8s/dev/configmap.yaml
+
+      - name: Create Secret from GitHub Secrets
         run: |
-          kubectl apply -f k8s/dev/configmap.yaml
-          kubectl apply -f k8s/dev/secret.yaml
+          kubectl create secret generic cohort2-app-secret \
+            --from-literal=APP_SECRET_KEY="${{ secrets.APP_SECRET_KEY }}" \
+            --namespace=cohort-dev \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Pin Image to Commit SHA
+        env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          sed -i "s|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${IMAGE_TAG}|g" k8s/dev/deployment.yaml
+          echo "Image pinned to: ${IMAGE_TAG}"
 
       - name: Apply Deployment and Service
         run: |

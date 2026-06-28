@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cohort2-app
-  namespace: cohort-dev
+  namespace: cohort-prod
   labels:
     app: cohort2-app
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: cohort2-app
