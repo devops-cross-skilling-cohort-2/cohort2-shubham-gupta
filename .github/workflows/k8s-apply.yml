@@ -39,7 +39,8 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
-          sed -i "s|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${IMAGE_TAG}|g" k8s/dev/deployment.yaml
+          sed -i.bak "s|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${IMAGE_TAG}|g" k8s/dev/deployment.yaml
+          rm -f k8s/dev/deployment.yaml.bak
           echo "Image pinned to: ${IMAGE_TAG}"
 
       - name: Apply Deployment and Service
