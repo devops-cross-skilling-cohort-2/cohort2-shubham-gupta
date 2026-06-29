@@ -40,8 +40,19 @@ jobs:
 
       - name: Verify Service Endpoint
         run: |
-          kubectl port-forward svc/cohort2-app-svc 9091:80 \
+          kubectl port-forward svc/cohort2-app-dev-svc 9091:80 \
             -n cohort-dev &
-          sleep 5
-          curl --fail http://localhost:9091/health
-          kill %1
+          PF_PID=$!
+          echo "Waiting for port-forward to be ready..."
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:9091/health; then
+              echo "Health check passed."
+              kill $PF_PID
+              exit 0
+            fi
+            echo "Attempt $i/15 — not ready, retrying in 2s"
+            sleep 2
+          done
+          echo "ERROR: Health check failed after 30s"
+          kill $PF_PID
+          exit 1
