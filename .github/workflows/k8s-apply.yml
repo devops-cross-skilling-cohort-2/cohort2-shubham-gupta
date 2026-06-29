@@ -22,37 +22,18 @@ jobs:
       - name: Verify Cluster Connectivity
         run: kubectl cluster-info --context k3d-cohort-local
 
-      - name: Apply Namespace
-        run: kubectl apply -f k8s/dev/namespace.yaml
-
-      - name: Apply ConfigMap
-        run: kubectl apply -f k8s/dev/configmap.yaml
-
-      - name: Create Secret from GitHub Secrets
-        run: |
-          kubectl create secret generic cohort2-app-secret \
-            --from-literal=APP_SECRET_KEY="${{ secrets.APP_SECRET_KEY }}" \
-            --namespace=cohort-dev \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Pin Image to Commit SHA
+      - name: Deploy to Dev with Helm
         env:
           IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
-          sed -i.bak "s|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:latest|${{ vars.DOCKERHUB_USERNAME }}/cohort2-app:${IMAGE_TAG}|g" k8s/dev/deployment.yaml
-          rm -f k8s/dev/deployment.yaml.bak
-          echo "Image pinned to: ${IMAGE_TAG}"
-
-      - name: Apply Deployment and Service
-        run: |
-          kubectl apply -f k8s/dev/deployment.yaml
-          kubectl apply -f k8s/dev/service.yaml
-
-      - name: Wait for Rollout
-        run: |
-          kubectl rollout status deployment/cohort2-app \
-            -n cohort-dev \
-            --timeout=120s
+          helm upgrade --install cohort2-app-dev ./helm/cohort2-app \
+            -f helm/cohort2-app/values-dev.yaml \
+            --set image.tag=${IMAGE_TAG} \
+            --set secret.appSecretKey="${{ secrets.APP_SECRET_KEY }}" \
+            --namespace cohort-dev \
+            --create-namespace \
+            --atomic \
+            --timeout 2m
 
       - name: Verify Pods are Ready
         run: kubectl get pods -n cohort-dev
